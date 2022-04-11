@@ -3,8 +3,11 @@
     package="id.vouched.plugintest">
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.CAMERA" />
+<!--    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />-->
+<!--    <uses-permission android:name="android.permission.RECORD_AUDIO" />-->
     <uses-permission android:name="android.webkit.PermissionRequest" />
-    <uses-feature android:name="android.hardware.camera" />
+    <uses-permission android:name="android.webkit.resource.VIDEO_CAPTURE" />
+    <uses-feature android:name="android.hardware.camera.any" />
     <uses-feature android:name="android.hardware.camera.autofocus" />
     <application
         android:allowBackup="true"
