@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">PluginTest</string>
+    <string name="app_name">Vouched Webview</string>
+    <string name="action_reload">Reload</string>
 </resources>

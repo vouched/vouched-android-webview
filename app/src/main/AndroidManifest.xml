@@ -3,19 +3,15 @@
     package="id.vouched.plugintest">
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.CAMERA" />
-<!--    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />-->
-<!--    <uses-permission android:name="android.permission.RECORD_AUDIO" />-->
     <uses-permission android:name="android.webkit.PermissionRequest" />
-    <uses-permission android:name="android.webkit.resource.VIDEO_CAPTURE" />
-    <uses-feature android:name="android.hardware.camera.any" />
     <uses-feature android:name="android.hardware.camera.autofocus" />
     <application
+        android:theme="@style/Theme.AppCompat.Light.NoActionBar"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
-        android:supportsRtl="true"
-        android:theme="@style/Theme.PluginTest">
+        android:supportsRtl="true">
         <activity
             android:name=".MainActivity"
             android:exported="true">
