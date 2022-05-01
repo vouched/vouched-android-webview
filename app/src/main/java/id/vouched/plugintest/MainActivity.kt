@@ -74,8 +74,10 @@ class MainActivity : AppCompatActivity(), VerificationListener {
         }
     }
 
-    // listens for verification results that are return from javaqscript
+    // listens for verification results that are return from javascript
     override fun onVerificationResults(success:Boolean, results: String) {
+        // based on success / fail, implement the code you wish, ie
+        // navigate to another fragment / activity
         Log.d("VerificationListener", success.toString())
         Log.d("VerificationListener", results)
     }

@@ -46,7 +46,41 @@ In mobile applications that use both web application content and native code, it
 
 To do this, we can use an Android feature called the *Javascript bridge*. We create a javascript interface in native code, that specifies the function names and data passed, which is then implemented in both the web application and Android native code that implements the interface.
 
-An example of that is shown here. We attach it to the 
+An example interface ``VouchedJSInterface``, included in the demo is shown below. Note the inclusion of a listener interface ```VerificationListener```, which will implemented by the Android components that wish to listen to verification results:
+
+```kotlin
+// Example code for how to connect Android Webview with the
+// Vouched js-plugin
+class VouchedJSInterface(private val listener: VerificationListener) {
+    @JavascriptInterface
+    fun onVerifyResults(success: Boolean, results: String) {
+        listener.onVerificationResults(success, results)
+    }
+}
+
+// generic interface
+interface VerificationListener {
+    fun onVerificationResults(success: Boolean, results: String)
+}
+```
+
+In our webview demo code, we add the interface:
+
+```myWebView.addJavascriptInterface(VouchedJSInterface(this), "VouchedJS")```
+
+Note that we are assigning "VouchedJS", meaning that when we are in the web application code, the function that implements the shared interface will be called as ```VouchedJS.onVerifyResults(success, results)```
+
+And likewise, in your plugin declaration in javascript, you will want to modify the ```onDone(job)``` callback to also implement the interface when the verification job is complete. Looking at the Quickstart example, we would expect the onDone section to look like this:
+
+```javascript
+// called when the verification is completed.
+onDone: (job) => {
+  console.log("Verification complete", { token: job.token });
+  VouchedJS.onVerifyResults(job.result.success === true, JSON.stringify(job));
+}
+```
+
+
 
 
 
