@@ -22,7 +22,7 @@ Find and launch the app called Webview Demo. A simple ID verification flow will 
 
 ### Webview Integration with Vouched JS-Plugin
 
-In Android, we will want to use the ```android.webkit.WebView``` and ```android.webkit.WebChromeClient``` components to host a web application. Most integrations will likely integrate with a page hosting the Vouched JS Plugin. If you haven't yet configured your web application to use the plugin, take a look at our [quickstart guide](https://docs.vouched.id/docs/js-plugin) to get started. 
+In Android we use the ```android.webkit.WebView``` and ```android.webkit.WebChromeClient``` components to host a web application. Most integrations will likely integrate with a page hosting the Vouched JS Plugin. If you haven't yet configured your web application to use the plugin, take a look at our [JS Plugin quickstart guide](https://docs.vouched.id/docs/js-plugin) to get started. 
 
 **Note:** Android offers many different ways to build an application. We'll focus on the changes as shown in the demo, which is an individual activity, but these steps can be applied just as easily to fragment based applications or other hybrid architectures. Likewise, in this document, we show how to allow the JS Plugin to communicate results to the native mobile application, to allow you to navigate or change behavior based on verification results, but you can learn of other approaches that may be of interest in the [Build apps in Webview](https://developer.android.com/guide/webapps/webview) Android documentation.
 
