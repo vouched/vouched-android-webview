@@ -2,29 +2,26 @@ package id.vouched.plugintest
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import android.view.MenuItem
-import android.view.View
-import android.webkit.ConsoleMessage
-import android.webkit.PermissionRequest
-import android.webkit.WebChromeClient
-import android.webkit.WebView
+import android.webkit.*
 import android.webkit.WebView.setWebContentsDebuggingEnabled
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 
 
 class MainActivity : AppCompatActivity(), VerificationListener {
 
     private var cameraPermission: PermissionRequest? = null
-    private val CAMERA_PERMISSION_REQUEST = 101299
-    //add your app key in gradle.properties
-    private val appId = BuildConfig.API_KEY
-    // the app url - this points to the Vouched production demo widget
-    // if hosting your own endpoint, change the url below.
-    private val webappUrl = "https://static.vouched.id/widget/demo/index.html#/demo?detectorRunFrameInterval=2&stepTitles%5BFrontId%5D=Upload%20ID&stepTitles%5BFace%5D=Upload%20Headshot&stepTitles%5BDone%5D=Finished&stepTitles%5BID_Captured%5D=ID%20Captured&stepTitles%5BFace_Captured%5D=Face%20Captured&stepTitles%5BStart%5D=Start&stepTitles%5BBackId%5D=ID%20%28Back%29&content%5BcrossDeviceShowOff%5D=true&showUploadFirst=true&showProgressBar=true&appId=${appId}&testingUri=https%3A%2F%2Fverify.vouched.id%2F&crossDevice=false&id=both&face=both&liveness=straight&debug=true&showFPS=false&sandbox=true&theme%5Bname%5D=verbose&theme%5BnavigationDisabledBackground%5D=rgba%28203%2C%20203%2C%20203%2C%200.15%29&theme%5BnavigationDisabledText%5D=%23888&theme%5BbaseColorLight%5D=rgb%28232%2C244%2C252%29&theme%5BprogressIndicatorTextColor%5D=%23000&type=id&survey=true&includeBackId=true&includeBarcode=true&disableCssBaseline=false&showTermsAndPrivacy=false&maxRetriesBeforeNext=0&idShowNext=0&handoffView%5BonlyShowQRCode%5D=false&locale=en&userConfirmation%5BconfirmData%5D=false&userConfirmation%5BconfirmImages%5D=false&isStage=true&manualCaptureTimeout=35000"
+    private val REQUEST_CAMERA_PERMISSION = 101299
+    private val REQUEST_FINE_LOCATION = 8052002
+    private var geolocationOrigin: String? = null
+    private var geolocationCallback: GeolocationPermissions.Callback? = null
 
+    //point the webappUrl to your plugin instance
+    private val webappUrl = "PLUGIN_URL_HERE"
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -44,9 +41,41 @@ class MainActivity : AppCompatActivity(), VerificationListener {
                 ActivityCompat.requestPermissions(
                     this@MainActivity,
                     arrayOf(Manifest.permission.CAMERA),
-                    CAMERA_PERMISSION_REQUEST
+                    REQUEST_CAMERA_PERMISSION
                 )
                 cameraPermission = request
+            }
+
+            override fun onGeolocationPermissionsShowPrompt(
+                origin: String,
+                callback: GeolocationPermissions.Callback
+            ) {
+                val perm = Manifest.permission.ACCESS_FINE_LOCATION
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M ||
+                    ContextCompat.checkSelfPermission(
+                        this@MainActivity,
+                        perm
+                    ) == PackageManager.PERMISSION_GRANTED
+                ) {
+                    // we're on SDK < 23 OR user has already granted permission
+                    callback.invoke(origin, true, false)
+                } else {
+                    if (!ActivityCompat.shouldShowRequestPermissionRationale(
+                            this@MainActivity,
+                            perm
+                        )
+                    ) {
+                        ActivityCompat.requestPermissions(
+                            this@MainActivity,
+                            arrayOf(perm),
+                            REQUEST_FINE_LOCATION
+                        )
+                        // hold onto the origin and callback for
+                        // permissions results callback
+                        geolocationOrigin = origin
+                        geolocationCallback = callback
+                    }
+                }
             }
         })
         // create a bridge between the javascript and the activity, which will
@@ -61,21 +90,35 @@ class MainActivity : AppCompatActivity(), VerificationListener {
     }
 
     override fun onRequestPermissionsResult(
-        requestCode: Int, permissions: Array<String?>,
+        requestCode: Int,
+        permissions: Array<String?>,
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == CAMERA_PERMISSION_REQUEST) {
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                cameraPermission?.grant(cameraPermission?.resources)
-            } else {
-                cameraPermission?.deny()
+        when (requestCode) {
+            REQUEST_FINE_LOCATION -> {
+                var allow = false
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // user has allowed this permission
+                    allow = true
+                }
+                if (geolocationCallback != null) {
+                    // call back to web chrome client
+                    geolocationCallback!!.invoke(geolocationOrigin, allow, false)
+                }
+            }
+            REQUEST_CAMERA_PERMISSION -> {
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    cameraPermission?.grant(cameraPermission?.resources)
+                } else {
+                    cameraPermission?.deny()
+                }
             }
         }
     }
 
     // listens for verification results that are return from javascript
-    override fun onVerificationResults(success:Boolean, results: String) {
+    override fun onVerificationResults(success: Boolean, results: String) {
         // based on success / fail, implement the code you wish, ie
         // navigate to another fragment / activity
         Log.d("VerificationListener", success.toString())
