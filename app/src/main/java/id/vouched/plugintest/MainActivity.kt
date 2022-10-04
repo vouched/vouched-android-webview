@@ -21,7 +21,7 @@ class MainActivity : AppCompatActivity(), VerificationListener {
     private var geolocationCallback: GeolocationPermissions.Callback? = null
 
     //point the webappUrl to your plugin instance
-    private val webappUrl = "PLUGIN_URL_HERE"
+    private val webappUrl = "JS_PLUGIN_URL_HERE"
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -102,9 +102,8 @@ class MainActivity : AppCompatActivity(), VerificationListener {
                     // user has allowed this permission
                     allow = true
                 }
-                if (geolocationCallback != null) {
-                    // call back to web chrome client
-                    geolocationCallback!!.invoke(geolocationOrigin, allow, false)
+                geolocationCallback?.let {
+                    it.invoke(geolocationOrigin, allow, false)
                 }
             }
             REQUEST_CAMERA_PERMISSION -> {
