@@ -15,8 +15,10 @@ import androidx.core.content.ContextCompat
 class MainActivity : AppCompatActivity(), VerificationListener {
 
     private var cameraPermission: PermissionRequest? = null
+    // request permission ids - these values can be any unique
+    // integer, and are used to identity permission request callbacks
     private val REQUEST_CAMERA_PERMISSION = 101299
-    private val REQUEST_FINE_LOCATION = 8052002
+    private val REQUEST_FINE_LOCATION_PERMISSION = 8052002
     private var geolocationOrigin: String? = null
     private var geolocationCallback: GeolocationPermissions.Callback? = null
 
@@ -68,7 +70,7 @@ class MainActivity : AppCompatActivity(), VerificationListener {
                         ActivityCompat.requestPermissions(
                             this@MainActivity,
                             arrayOf(perm),
-                            REQUEST_FINE_LOCATION
+                            REQUEST_FINE_LOCATION_PERMISSION
                         )
                         // hold onto the origin and callback for
                         // permissions results callback
@@ -96,7 +98,7 @@ class MainActivity : AppCompatActivity(), VerificationListener {
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         when (requestCode) {
-            REQUEST_FINE_LOCATION -> {
+            REQUEST_FINE_LOCATION_PERMISSION -> {
                 var allow = false
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // user has allowed this permission
