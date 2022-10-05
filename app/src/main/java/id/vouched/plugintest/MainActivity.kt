@@ -102,9 +102,8 @@ class MainActivity : AppCompatActivity(), VerificationListener {
                     // user has allowed this permission
                     allow = true
                 }
-                if (geolocationCallback != null) {
-                    // call back to web chrome client
-                    geolocationCallback!!.invoke(geolocationOrigin, allow, false)
+                geolocationCallback?.let {
+                    it.invoke(geolocationOrigin, allow, false)
                 }
             }
             REQUEST_CAMERA_PERMISSION -> {
