@@ -27,11 +27,8 @@ class MainActivity : AppCompatActivity(), VerificationListener {
     // integer, and are used to identity permission request callbacks
     private val REQUEST_CAMERA_PERMISSION = 100001
     private val REQUEST_FINE_LOCATION_PERMISSION = 100002
-    private val REQUEST_FILE_ACCESS_PERMISSION = 100003;
     private var geolocationOrigin: String? = null
     private var geolocationCallback: GeolocationPermissions.Callback? = null
-    private var filePathCallback: ValueCallback<Array<Uri>?>? = null
-    private var cameraPhotoPath: String? = null
 
     //point the webappUrl to your plugin instance
     private val webappUrl = "https://static.stage.vouched.id/widget/demo/index.html#"
@@ -59,52 +56,6 @@ class MainActivity : AppCompatActivity(), VerificationListener {
                 )
                 cameraPermission = request
             }
-
-//            override fun onShowFileChooser(
-//                webView: WebView?, newFilePathCallback: ValueCallback<Array<Uri?>?>,
-//                fileChooserParams: FileChooserParams?
-//            ): Boolean {
-//                filePathCallback?.onReceiveValue(null)
-//                filePathCallback = newFilePathCallback
-//                var takePictureIntent: Intent? = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-//                if (takePictureIntent!!.resolveActivity(packageManager) != null) {
-//                    // Create the File where the photo should go
-//                    var photoFile: File? = null
-//                    // Create an image file name
-//                    val timeStamp: String =
-//                        SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
-//                    val imageFileName = "JPEG_" + timeStamp + "_"
-//                    val storageDir: File =
-//                        Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
-//                    try {
-//                        photoFile = File.createTempFile(imageFileName, ".jpg", storageDir)
-//                    } catch (ex: IOException) {
-//                        // Error occurred while creating the File
-//                    }
-//
-//                    // Continue only if the File was successfully created
-//                    if (photoFile != null) {
-//                        cameraPhotoPath = "file:" + photoFile.getAbsolutePath()
-//                        takePictureIntent!!.putExtra(
-//                            MediaStore.EXTRA_OUTPUT,
-//                            Uri.fromFile(photoFile)
-//                        )
-//                    } else {
-//                        takePictureIntent = null
-//                    }
-//                }
-//                val contentSelectionIntent = Intent(Intent.ACTION_GET_CONTENT)
-//                contentSelectionIntent.addCategory(Intent.CATEGORY_OPENABLE)
-//                contentSelectionIntent.type = "image/*"
-//                val intentArray: Array<Intent?>
-//                intentArray = takePictureIntent?.let { arrayOf(it) } ?: arrayOfNulls(0)
-//                val chooserIntent = Intent(Intent.ACTION_CHOOSER)
-//                chooserIntent.putExtra(Intent.EXTRA_INTENT, contentSelectionIntent)
-//                chooserIntent.putExtra(Intent.EXTRA_TITLE, "Image Chooser")
-//                chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, intentArray)
-//                startActivityForResult(chooserIntent, REQUEST_FILE_ACCESS_PERMISSION)
-//                return true
-//            }
 
             override fun onGeolocationPermissionsShowPrompt(
                 origin: String,
