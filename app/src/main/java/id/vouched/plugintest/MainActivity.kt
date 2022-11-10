@@ -1,15 +1,23 @@
 package id.vouched.plugintest
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Environment
+import android.provider.MediaStore
 import android.util.Log
 import android.webkit.*
 import android.webkit.WebView.setWebContentsDebuggingEnabled
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import java.io.File
+import java.io.IOException
+import java.text.SimpleDateFormat
+import java.util.*
 
 
 class MainActivity : AppCompatActivity(), VerificationListener {
@@ -17,13 +25,13 @@ class MainActivity : AppCompatActivity(), VerificationListener {
     private var cameraPermission: PermissionRequest? = null
     // request permission ids - these values can be any unique
     // integer, and are used to identity permission request callbacks
-    private val REQUEST_CAMERA_PERMISSION = 101299
-    private val REQUEST_FINE_LOCATION_PERMISSION = 8052002
+    private val REQUEST_CAMERA_PERMISSION = 100001
+    private val REQUEST_FINE_LOCATION_PERMISSION = 100002
     private var geolocationOrigin: String? = null
     private var geolocationCallback: GeolocationPermissions.Callback? = null
 
     //point the webappUrl to your plugin instance
-    private val webappUrl = "PLUGIN_URL_HERE"
+    private val webappUrl = "https://static.stage.vouched.id/widget/demo/index.html#"
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -42,7 +50,8 @@ class MainActivity : AppCompatActivity(), VerificationListener {
                 // todo - probably best to check the request origin url
                 ActivityCompat.requestPermissions(
                     this@MainActivity,
-                    arrayOf(Manifest.permission.CAMERA),
+                    arrayOf(Manifest.permission.CAMERA, Manifest.permission.READ_EXTERNAL_STORAGE,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE),
                     REQUEST_CAMERA_PERMISSION
                 )
                 cameraPermission = request
