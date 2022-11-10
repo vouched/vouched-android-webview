@@ -1,28 +1,43 @@
 package id.vouched.plugintest
 
 import android.Manifest
-import android.content.Intent
+import android.content.ActivityNotFoundException
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.os.Environment
-import android.provider.MediaStore
 import android.util.Log
-import android.webkit.*
+import android.webkit.ConsoleMessage
+import android.webkit.GeolocationPermissions
+import android.webkit.PermissionRequest
+import android.webkit.ValueCallback
+import android.webkit.WebChromeClient
+import android.webkit.WebView
 import android.webkit.WebView.setWebContentsDebuggingEnabled
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import java.io.File
-import java.io.IOException
-import java.text.SimpleDateFormat
-import java.util.*
-
 
 class MainActivity : AppCompatActivity(), VerificationListener {
 
+    private val fileChooserLauncher = registerForActivityResult(StartActivityForResult()) { result ->
+        result.data?.let { data ->
+            WebChromeClient.FileChooserParams.parseResult(RESULT_OK, data)?.let { uris ->
+                webChromeClientFilePathCallback?.onReceiveValue(uris)
+                webChromeClientFilePathCallback = null
+                return@registerForActivityResult
+            }
+        }
+        webChromeClientFilePathCallback?.onReceiveValue(null)
+        webChromeClientFilePathCallback = null
+    }
+
+    private var webChromeClientFilePathCallback: ValueCallback<Array<Uri>>? = null
+
     private var cameraPermission: PermissionRequest? = null
+
     // request permission ids - these values can be any unique
     // integer, and are used to identity permission request callbacks
     private val REQUEST_CAMERA_PERMISSION = 100001
@@ -30,15 +45,37 @@ class MainActivity : AppCompatActivity(), VerificationListener {
     private var geolocationOrigin: String? = null
     private var geolocationCallback: GeolocationPermissions.Callback? = null
 
-    //point the webappUrl to your plugin instance
+    // point the webappUrl to your plugin instance
     private val webappUrl = "https://static.stage.vouched.id/widget/demo/index.html#"
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         val myWebView: WebView = findViewById(R.id.webview)
-        setWebContentsDebuggingEnabled(true);
+        setWebContentsDebuggingEnabled(true)
 
-        myWebView.setWebChromeClient(object : WebChromeClient() {
+        myWebView.webChromeClient = object : WebChromeClient() {
+
+            override fun onShowFileChooser(
+                webView: WebView?,
+                filePathCallback: ValueCallback<Array<Uri>>?,
+                fileChooserParams: FileChooserParams?
+            ): Boolean {
+                webChromeClientFilePathCallback?.let {
+                    it.onReceiveValue(null)
+                    webChromeClientFilePathCallback = null
+                }
+                webChromeClientFilePathCallback = filePathCallback
+                fileChooserParams?.createIntent()?.let { intent ->
+                    try {
+                        fileChooserLauncher.launch(intent)
+                    } catch (e: ActivityNotFoundException) {
+                        Toast.makeText(this@MainActivity, "Cannot Open File Chooser", Toast.LENGTH_LONG)
+                            .show()
+                        return false
+                    }
+                }
+                return true
+            }
 
             // convenience method to expose console.log output.
             override fun onConsoleMessage(consoleMessage: ConsoleMessage): Boolean {
@@ -50,8 +87,11 @@ class MainActivity : AppCompatActivity(), VerificationListener {
                 // todo - probably best to check the request origin url
                 ActivityCompat.requestPermissions(
                     this@MainActivity,
-                    arrayOf(Manifest.permission.CAMERA, Manifest.permission.READ_EXTERNAL_STORAGE,
-                        Manifest.permission.WRITE_EXTERNAL_STORAGE),
+                    arrayOf(
+                        Manifest.permission.CAMERA,
+                        Manifest.permission.READ_EXTERNAL_STORAGE,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE
+                    ),
                     REQUEST_CAMERA_PERMISSION
                 )
                 cameraPermission = request
@@ -64,9 +104,9 @@ class MainActivity : AppCompatActivity(), VerificationListener {
                 val perm = Manifest.permission.ACCESS_FINE_LOCATION
                 if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M ||
                     ContextCompat.checkSelfPermission(
-                        this@MainActivity,
-                        perm
-                    ) == PackageManager.PERMISSION_GRANTED
+                            this@MainActivity,
+                            perm
+                        ) == PackageManager.PERMISSION_GRANTED
                 ) {
                     // we're on SDK < 23 OR user has already granted permission
                     callback.invoke(origin, true, false)
@@ -88,13 +128,16 @@ class MainActivity : AppCompatActivity(), VerificationListener {
                     }
                 }
             }
-        })
+        }
         // create a bridge between the javascript and the activity, which will
         // be referenced by the name 'VouchedJS' in our webapp's javascript
         myWebView.addJavascriptInterface(VouchedJSInterface(this), "VouchedJS")
         myWebView.apply {
             settings.javaScriptEnabled = true
             settings.mediaPlaybackRequiresUserGesture = false
+            settings.domStorageEnabled = true
+            settings.allowFileAccess = true
+            settings.allowContentAccess = true
             // remember to replace webAppUrl with the URL of your Camera App
             loadUrl(webappUrl)
         }
