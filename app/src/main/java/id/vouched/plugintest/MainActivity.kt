@@ -53,6 +53,33 @@ class MainActivity : AppCompatActivity(), VerificationListener {
         val myWebView: WebView = findViewById(R.id.webview)
         setWebContentsDebuggingEnabled(true)
 
+        // uncomment this section to allow web links in [myWebView], please make sure to only allow
+        // trusted links
+        /*
+        val onBackPressedCallbackForWebView = object : OnBackPressedCallback(false) {
+            override fun handleOnBackPressed() {
+                val currentIndex = myWebView.copyBackForwardList().currentIndex
+                if (myWebView.canGoBack()) myWebView.goBack()
+                if (currentIndex == 1) isEnabled = false
+            }
+        }
+
+        onBackPressedDispatcher.addCallback(onBackPressedCallbackForWebView)
+
+        myWebView.webViewClient = object : WebViewClient() {
+
+            override fun shouldOverrideUrlLoading(
+                view: WebView?,
+                request: WebResourceRequest?
+            ): Boolean {
+                request?.url?.let {
+                    view?.loadUrl(it.toString())
+                    onBackPressedCallbackForWebView.isEnabled = true
+                }
+                return true
+            }
+        } */
+
         myWebView.webChromeClient = object : WebChromeClient() {
 
             override fun onShowFileChooser(
